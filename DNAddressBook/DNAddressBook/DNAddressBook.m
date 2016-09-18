@@ -127,13 +127,23 @@
     //不带声调的拼音
     CFStringTransform((CFMutableStringRef)str,NULL, kCFStringTransformStripDiacritics,NO);
     //转化为大写拼音
-    NSString *strPinYin = [str capitalizedString];
+    NSString *strPinYin   = [str capitalizedString];
     NSString *firstString = [strPinYin substringToIndex:1];
     //判断姓名首位是否为大写字母
-    NSString * regexA = @"^[A-Z]$";
-    NSPredicate *predA = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", regexA];
+    NSString * regexA     = @"^[A-Z]$";
+    NSPredicate *predA    = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", regexA];
     //获取并返回首字母
     return [predA evaluateWithObject:firstString] ? firstString : @"#";
 }
+
+
++ (void)addPersonToAddressBook:(DNPersonModel *)person failure:(AuthorizationFailure)failure {
+    [DNAddressBookHandle addPersonToAddressBook:person failure:^{
+        failure ? failure() : nil;
+    }];
+}
+
+
+
 
 @end

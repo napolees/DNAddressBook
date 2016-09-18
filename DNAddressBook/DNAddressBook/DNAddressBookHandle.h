@@ -29,4 +29,9 @@ typedef void(^AuthorizationFailure)(void);              /**<授权失败的Block
  */
 + (void)getAddressBookDataSource:(DNPersonModelBlock)personModel authorizationFailure:(AuthorizationFailure)failure;
 
+/**
+ *  添加一个联系人到通讯录中
+*/
++ (void)addPersonToAddressBook:(DNPersonModel *)person failure:(AuthorizationFailure)failure;
+
 @end

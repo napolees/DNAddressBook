@@ -11,7 +11,6 @@
 @implementation DNAddressBookHandle
 
 + (void)getAddressBookDataSource:(DNPersonModelBlock)personModel authorizationFailure:(AuthorizationFailure)failure {
-    
     if(IOS9_LATER) {
         [self getDataSourceFrom_IOS9_Later:personModel authorizationFailure:failure];
     } else {
@@ -36,12 +35,12 @@
     for(id personInfo in (__bridge NSArray *)allPeopleArray) {
         DNPersonModel *model = [DNPersonModel new];
         // 5.1获取到联系人
-        ABRecordRef person = (__bridge ABRecordRef)(personInfo);
+        ABRecordRef person   = (__bridge ABRecordRef)(personInfo);
         // 5.2获取姓名
-        NSString *lastName = (__bridge_transfer NSString *)ABRecordCopyValue(person, kABPersonLastNameProperty);
+        NSString *lastName   = (__bridge_transfer NSString *)ABRecordCopyValue(person, kABPersonLastNameProperty);
         NSString *middleName = (__bridge_transfer NSString *)ABRecordCopyValue(person, kABPersonMiddleNameProperty);
-        NSString *firstName = (__bridge_transfer NSString *)ABRecordCopyValue(person, kABPersonFirstNameProperty);
-        NSString *name = [NSString stringWithFormat:@"%@%@%@",lastName?lastName:@"",middleName?middleName:@"",firstName?firstName:@""];
+        NSString *firstName  = (__bridge_transfer NSString *)ABRecordCopyValue(person, kABPersonFirstNameProperty);
+        NSString *name       = [NSString stringWithFormat:@"%@ %@ %@",firstName?firstName:@"",middleName?middleName:@"",lastName?lastName:@""];
         model.name = name.length > 0 ? name : @"无名氏" ;
         // 5.3获取头像数据
         NSData *imageData = (__bridge_transfer NSData *)ABPersonCopyImageDataWithFormat(person, kABPersonImageFormatThumbnail);
@@ -85,7 +84,6 @@
             addressModel.zip     = [temDic valueForKey:(NSString*)kABPersonAddressZIPKey];
             model.address = addressModel;
         }
-        
         // 5.5将联系人模型回调出去
         personModel(model);
         CFRelease(phones);
@@ -117,12 +115,12 @@
     NSError *error = nil;
     [store enumerateContactsWithFetchRequest:request error:&error usingBlock:^(CNContact * _Nonnull contact,BOOL * _Nonnull stop) {
         // 姓名
-        NSString *lastName = contact.familyName;
+        NSString *lastName   = contact.familyName;
         NSString *middleName = contact.middleName;
-        NSString *firstName = contact.givenName;
+        NSString *firstName  = contact.givenName;
         // 创建联系人模型
         DNPersonModel *model = [DNPersonModel new];
-        NSString *name = [NSString stringWithFormat:@"%@%@%@",lastName?lastName:@"",middleName?middleName:@"",firstName?firstName:@""];
+        NSString *name = [NSString stringWithFormat:@"%@ %@ %@",firstName?firstName:@"",middleName?middleName:@"",lastName?lastName:@""];
         model.name = name.length > 0 ? name : @"无名氏" ;
         
         // 联系人头像
@@ -178,6 +176,100 @@
     string = [string stringByReplacingOccurrencesOfString:@" " withString:@""];
     string = [string stringByReplacingOccurrencesOfString:@" " withString:@""];
     return string;
+}
+
+
+#pragma Mark - 保存联系人到通讯录
++ (void)addPersonToAddressBook:(DNPersonModel *)person failure:(AuthorizationFailure)failure {
+    if(IOS9_LATER) {
+        [self addPersonToAddressBook_IOS9_Later:person failure:failure];
+    } else {
+        [self addPersonToAddressBook_IOS9_Ago:person failure:failure];
+    }
+}
+
++ (void)addPersonToAddressBook_IOS9_Later:(DNPersonModel *)person failure:(AuthorizationFailure)failure {
+    CNAuthorizationStatus status = [CNContactStore authorizationStatusForEntityType:CNEntityTypeContacts];
+    if (status != CNAuthorizationStatusAuthorized) {
+        failure ? failure() : nil;
+        return;
+    }
+    CNMutableContact * contact = [[CNMutableContact alloc]init];
+    contact.imageData          = UIImagePNGRepresentation(person.headerImage);
+    contact.givenName          = person.name;//设置名字
+    contact.organizationName   = person.organization;// 设置公司
+    contact.departmentName     = person.department;
+    contact.jobTitle           = person.job;
+    if (person.emailAddresses.count > 0) {
+        contact.emailAddresses = @[[CNLabeledValue labeledValueWithLabel:CNLabelWork value:person.emailAddresses[0]]];//邮箱
+    }
+    if (person.mobile.count > 0) {
+        contact.phoneNumbers = @[[CNLabeledValue labeledValueWithLabel:CNLabelPhoneNumberiPhone value:[CNPhoneNumber phoneNumberWithStringValue:person.mobile[0]]]];//电话
+    }
+    //地址
+    CNMutablePostalAddress * homeAdress = [[CNMutablePostalAddress alloc]init];
+    homeAdress.street                   = person.address.street;
+    homeAdress.city                     = person.address.city;
+    homeAdress.state                    = person.address.state;
+    homeAdress.postalCode               = person.address.zip;
+    contact.postalAddresses             = @[[CNLabeledValue labeledValueWithLabel:CNLabelHome value:homeAdress]];
+    
+    //初始化方法
+    CNSaveRequest * saveRequest = [[CNSaveRequest alloc]init];
+    //将创建的联系人添加到系统通讯录中
+    [saveRequest addContact:contact toContainerWithIdentifier:nil];
+    CNContactStore * store      = [[CNContactStore alloc]init];
+    [store executeSaveRequest:saveRequest error:nil];//保存前面创建的请求
+}
+
++ (void)addPersonToAddressBook_IOS9_Ago:(DNPersonModel *)person failure:(AuthorizationFailure)failure {
+    ABAuthorizationStatus status = ABAddressBookGetAuthorizationStatus();
+    if (status != kABAuthorizationStatusAuthorized) { // 已经授权
+        failure ? failure() : nil;
+        return;
+    }
+    ABAddressBookRef addressBook = ABAddressBookCreate();
+    //创建一条记录
+    ABRecordRef recordRef = ABPersonCreate();
+    //添加名
+    ABRecordSetValue(recordRef,kABPersonFirstNameProperty,(__bridge CFTypeRef)(person.name),NULL);
+    //添加公司信息
+    ABRecordSetValue(recordRef, kABPersonOrganizationProperty, (__bridge CFTypeRef)(person.organization), NULL);
+    ABRecordSetValue(recordRef, kABPersonDepartmentProperty, (__bridge CFTypeRef)(person.department), NULL);
+    ABRecordSetValue(recordRef, kABPersonJobTitleProperty, (__bridge CFTypeRef)(person.job), NULL);
+    
+    ABMultiValueRef multiValueRef1 = ABMultiValueCreateMutable(kABMultiStringPropertyType);
+    if (person.mobile.count > 0) {
+        //添加联系电话
+        ABMultiValueAddValueAndLabel(multiValueRef1, (__bridge CFStringRef)(person.mobile[0]), kABWorkLabel, NULL);
+        ABRecordSetValue(recordRef, kABPersonPhoneProperty, multiValueRef1, NULL);
+    }
+    
+    ABMultiValueRef multiValueRef2 = ABMultiValueCreateMutable(kABPersonEmailProperty);
+    if (person.emailAddresses.count > 0) {
+        //添加电子邮件
+        ABMultiValueAddValueAndLabel(multiValueRef2, (__bridge CFStringRef)(person.emailAddresses[0]), kABWorkLabel, NULL);
+        ABRecordSetValue(recordRef, kABPersonEmailProperty, multiValueRef2, NULL);
+    }
+    //添加地址(这个有些特殊)
+    ABMultiValueRef multiValueRef3 = ABMultiValueCreateMutable(kABMultiDictionaryPropertyType);
+    NSMutableDictionary *values    = [[NSMutableDictionary alloc] init];
+    [values setValue:person.address.street forKey:(NSString *)kABPersonAddressStreetKey];
+    [values setValue:person.address.city forKey:(NSString *)kABPersonAddressCityKey];
+    [values setValue:person.address.state forKey:(NSString *)kABPersonAddressStateKey];
+    [values setValue:person.address.zip forKey:(NSString *)kABPersonAddressZIPKey];
+    ABMultiValueAddValueAndLabel(multiValueRef3, (__bridge CFDictionaryRef)values, kABHomeLabel, NULL);
+    ABRecordSetValue(recordRef, kABPersonAddressProperty, multiValueRef3, NULL);
+    
+    //添加记录到通讯录
+    ABAddressBookAddRecord(addressBook, recordRef, NULL);
+    //保存通讯录，提交更改
+    ABAddressBookSave(addressBook, NULL);
+    //释放资源
+    CFRelease(recordRef);
+    CFRelease(multiValueRef1);
+    CFRelease(multiValueRef2);
+    CFRelease(multiValueRef3);
 }
 
 @end

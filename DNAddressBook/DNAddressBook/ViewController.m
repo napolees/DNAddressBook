@@ -25,7 +25,6 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    
     self.tableView.tableFooterView = [UIView new];
     self.tableView.rowHeight = 60;
     
@@ -84,6 +83,9 @@
     NSString *key = _keys[indexPath.section];
     DNPersonModel *people = [_contactPeopleDict[key] objectAtIndex:indexPath.row];
     NSLog(@"点击的是:%@, 电话是:%@, 邮箱:%@, 公司:%@, 部门:%@, 职位:%@, 地址:%@", people.name, people.mobile, people.emailAddresses, people.organization, people.department, people.job, people.address.type);
+    [DNAddressBook addPersonToAddressBook:people failure:^{
+        NSLog(@"授权失败");
+    }];
 }
 
 - (void)didReceiveMemoryWarning {

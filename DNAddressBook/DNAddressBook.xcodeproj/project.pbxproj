@@ -19,6 +19,7 @@
 		51A3848F1D88E44000A41548 /* DNAddressBook.m in Sources */ = {isa = PBXBuildFile; fileRef = 51A3848E1D88E44000A41548 /* DNAddressBook.m */; };
 		51A384921D88E57E00A41548 /* DNAddressBookHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 51A384911D88E57E00A41548 /* DNAddressBookHandle.m */; };
 		51A384941D88F45700A41548 /* defult.png in Resources */ = {isa = PBXBuildFile; fileRef = 51A384931D88F45700A41548 /* defult.png */; };
+		51EC967C1D8E6E1A00FC329C /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51EC967B1D8E6E1A00FC329C /* AddressBook.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,7 @@
 		51A384901D88E57E00A41548 /* DNAddressBookHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DNAddressBookHandle.h; sourceTree = "<group>"; };
 		51A384911D88E57E00A41548 /* DNAddressBookHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DNAddressBookHandle.m; sourceTree = "<group>"; };
 		51A384931D88F45700A41548 /* defult.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = defult.png; sourceTree = "<group>"; };
+		51EC967B1D8E6E1A00FC329C /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				51EC967C1D8E6E1A00FC329C /* AddressBook.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +95,7 @@
 		51A3844B1D88E23600A41548 = {
 			isa = PBXGroup;
 			children = (
+				51EC967B1D8E6E1A00FC329C /* AddressBook.framework */,
 				51A384561D88E23600A41548 /* DNAddressBook */,
 				51A384701D88E23600A41548 /* DNAddressBookTests */,
 				51A3847B1D88E23600A41548 /* DNAddressBookUITests */,
@@ -527,6 +531,7 @@
 				51A384831D88E23600A41548 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		51A384841D88E23600A41548 /* Build configuration list for PBXNativeTarget "DNAddressBookTests" */ = {
 			isa = XCConfigurationList;
@@ -535,6 +540,7 @@
 				51A384861D88E23600A41548 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		51A384871D88E23600A41548 /* Build configuration list for PBXNativeTarget "DNAddressBookUITests" */ = {
 			isa = XCConfigurationList;
@@ -543,6 +549,7 @@
 				51A384891D88E23600A41548 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

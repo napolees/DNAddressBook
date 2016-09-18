@@ -22,6 +22,8 @@ typedef void(^AddressBookArrayBlock)(NSArray<DNPersonModel *> *addressBookArray)
  */
 typedef void(^AddressBookDictBlock)(NSDictionary<NSString *,NSArray *> *addressBookDict,NSArray *peopleNameKey);
 
+
+
 @interface DNAddressBook : NSObject
 
 /**
@@ -44,5 +46,16 @@ typedef void(^AddressBookDictBlock)(NSDictionary<NSString *,NSArray *> *addressB
  *  @param failure         授权失败
  */
 + (void)getOrderAddressBook:(AddressBookDictBlock)addressBookInfo authorizationFailure:(AuthorizationFailure)failure;
+
+
+/**
+ *  添加联系人到通讯录中
+ *
+ *  @param person  联系人信息模型
+ *  @param failure 授权失败
+ */
++ (void)addPersonToAddressBook:(DNPersonModel *)person failure:(AuthorizationFailure)failure;
+
+
 
 @end
